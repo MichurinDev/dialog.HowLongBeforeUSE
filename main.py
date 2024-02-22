@@ -1,30 +1,46 @@
-from flask import Flask, request
-import logging
 import json
+import datetime
 
-app = Flask(__name__)
+month = {
+    "05": "мая",
+    "06": "июня"
+}
 
-logging.debug(level = logging.DEBUG)
+def handler(event, context):
+    text = 'Привет! Задаёшься вопросом, сколько осталось до ЕГЭ? Сейчас выясним! По какому предмету хочешь узнать дату?'
 
-@app.route("/", methods=["POST"])
-def main():
-    logging.info(request.json)
+    with open("dates.json") as f:
+        dates = json.loads(f.read())
 
-    response = {
-        "version": request.json["version"],
-        "session": request.json["session"],
-        "response": {
-            "end_session": False
-        }
+    if 'request' in event and 'original_utterance' in event['request'] and len(event['request']['original_utterance']) > 0:
+        exam_dates = dates.get(event['request']['original_utterance'].lower(), "Такой предмет отсутствует!")
+        print(exam_dates)
+        if exam_dates != "Такой предмет отсутствует!":
+            main_dates = exam_dates["main"]
+            reserve_dates = exam_dates["reserve"]
+
+            temp_arr = []
+            text = "Основной период: "
+            for d in main_dates:
+                day, mon = d.split(".")
+                temp_arr.append(f"{day} {month[mon]}")
+            text += ", ".join(temp_arr)
+
+
+            temp_arr = []
+            text += "\nРезервный период: "
+            for d in reserve_dates:
+                day, mon = d.split(".")
+                temp_arr.append(f"{day} {month[mon]}")
+            text += ", ".join(temp_arr)
+        else:
+            text = "Такой предмет отсутствует!"
+
+    return {
+        'version': event['version'],
+        'session': event['session'],
+        'response': {
+            'text': text,
+            'end_session': 'false'
+        },
     }
-
-    req = request.json
-    if req["session"]["new"]:
-        response["session"]["text"] = "Здарова, заебал!"
-    else:
-        if response["request"]["original_utterance"].lower() in ["привет"]:
-            response["session"]["text"] = "Привет-привет!"
-        elif response["request"]["original_utterance"].lower() in ["пока"]:
-            response["session"]["text"] = "Пока!"
-    
-    return json.dumps(response)
