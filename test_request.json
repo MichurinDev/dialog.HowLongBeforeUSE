@@ -24,7 +24,7 @@
     },
     "request": {
       "command": "",
-      "original_utterance": "русский язык",
+      "original_utterance": "Предметы",
       "nlu": {
         "tokens": [],
         "entities": [],

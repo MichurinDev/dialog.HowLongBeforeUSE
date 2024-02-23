@@ -1,21 +1,21 @@
 import json
 import datetime
 
-month = {
-    "05": "мая",
-    "06": "июня"
-}
+from strings import *
+
 
 def handler(event, context):
-    text = 'Привет! Задаёшься вопросом, сколько осталось до ЕГЭ? Сейчас выясним! По какому предмету хочешь узнать дату?'
+    text = start_text
 
     with open("dates.json", encoding="utf-8") as f:
         dates = json.loads(f.read())
 
-    if 'request' in event and 'original_utterance' in event['request'] and len(event['request']['original_utterance']) > 0:
-        exam_dates = dates.get(event['request']['original_utterance'].lower(), "Такой предмет отсутствует!")
+    user_input = event['request']['original_utterance']
 
-        if exam_dates != "Такой предмет отсутствует!":
+    if 'request' in event and 'original_utterance' in event['request'] and len(user_input) > 0:
+        exam_dates = dates.get(user_input.lower(), error_text)
+
+        if exam_dates != error_text:
             main_dates = exam_dates["main"]
             reserve_dates = exam_dates["reserve"]
 
@@ -39,7 +39,12 @@ def handler(event, context):
                 temp_arr.append(f"{day} {month[mon]}")
             text += ", ".join(temp_arr)
         else:
-            text = "Такой предмет отсутствует!"
+            if user_input.lower() == "предметы":
+                bullit = "• "
+                text = f"Список предметов:\n{bullit}" +\
+                    f"\n{bullit}".join([s.capitalize() for s in dates])
+            else:
+                text = error_text
 
     return {
         'version': event['version'],
