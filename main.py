@@ -5,7 +5,7 @@ from strings import *
 
 
 def handler(event, context):
-    text = start_text
+    response_text = start_text + help_text
 
     with open("dates.json", encoding="utf-8") as f:
         dates = json.loads(f.read())
@@ -22,35 +22,37 @@ def handler(event, context):
             exam_day = datetime.datetime.strptime(main_dates[0], "%d.%m")
             exam_day = datetime.date(year=2024, month=exam_day.month, day=exam_day.day)
             delta = str(exam_day - datetime.date.today()).split()[0]
-            text = f"Осталось {delta} дней!"
+            response_text = f"Осталось {delta} дней!"
                 
             temp_arr = []
-            text += "\nОсновной период: "
+            response_text += "\nОсновной период: "
             for d in main_dates:
                 day, mon = d.split(".")
                 temp_arr.append(f"{day} {month[mon]}")
-            text += ", ".join(temp_arr)
+            response_text += ", ".join(temp_arr)
 
 
             temp_arr = []
-            text += "\nРезервный период: "
+            response_text += "\nРезервный период: "
             for d in reserve_dates:
                 day, mon = d.split(".")
                 temp_arr.append(f"{day} {month[mon]}")
-            text += ", ".join(temp_arr)
+            response_text += ", ".join(temp_arr)
         else:
             if user_input.lower() == "предметы":
                 bullit = "• "
-                text = f"Список предметов:\n{bullit}" +\
+                response_text = f"Список предметов:\n{bullit}" +\
                     f"\n{bullit}".join([s.capitalize() for s in dates])
+            elif user_input.lower() in ["помощь", "что ты умеешь?", "что ты умеешь"]:
+                response_text = help_text
             else:
-                text = error_text
+                response_text = error_text
 
     return {
         'version': event['version'],
         'session': event['session'],
         'response': {
-            'text': text,
+            'text': response_text,
             'end_session': 'false'
         },
     }

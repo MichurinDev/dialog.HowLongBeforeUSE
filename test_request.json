@@ -24,14 +24,14 @@
     },
     "request": {
       "command": "",
-      "original_utterance": "Предметы",
+      "original_utterance": "",
       "nlu": {
         "tokens": [],
         "entities": [],
         "intents": {}
       },
       "markup": {
-        "dangerous_context": false
+        "dangerous_context": true
       },
       "type": "SimpleUtterance"
     },
